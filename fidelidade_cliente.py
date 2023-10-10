@@ -15,7 +15,7 @@ ctk.set_appearance_mode('light')
 ctk.set_default_color_theme('green')
 
 #escrever uma mensagem na janela
-texto = ctk.CTkLabel(app, text='Seja Bem Vindo!', text_color='red', font=('Arial', 40, 'bold', 'italic'))
+texto = ctk.CTkLabel(app, text='Seja Bem Vindo(a)!', text_color='red', font=('Arial', 40, 'bold', 'italic'))
 texto.pack(padx=30, pady=30)
 texto = ctk.CTkFont(family='Arial', size=200)
 texto1 = ctk.CTkLabel(app, text='Digite o valor total da compra:')
