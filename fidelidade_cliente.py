@@ -1,90 +1,120 @@
 import customtkinter as ctk
+from tkinter import messagebox
 
-#abrir janela
-app = ctk.CTk()
+class PharmacyApp(ctk.CTk):
+    def __init__(self):
+        super().__init__()
 
-#definir tamanho janela e o nome
-app.geometry('400x600')
-app.title('Farmácia San Paolo')
+        # Configuração da janela principal
+        self.title('Farmácia San Paolo')
+        self.geometry('500x700')
+        
+        # Configuração do tema
+        ctk.set_appearance_mode('light')
+        ctk.set_default_color_theme('green')
 
-#definir o tema
-ctk.set_appearance_mode('light')
-ctk.set_default_color_theme('green')
+        self.create_widgets()
 
-#escrever uma mensagem na janela
-texto = ctk.CTkLabel(app, text='Seja Bem Vindo(a)!', text_color='red', font=('Arial', 35, 'bold', 'italic'))
-texto.pack(padx=30, pady=30)
-texto = ctk.CTkFont(family='Arial', size=200)
-texto1 = ctk.CTkLabel(app, text='Digite o valor total da compra:')
-texto1.pack(padx=0, pady=0)
+    def create_widgets(self):
+        # Título
+        self.label_titulo = ctk.CTkLabel(self, text='Seja Bem Vindo(a)!', text_color='red', font=('Arial', 30, 'bold', 'italic'))
+        self.label_titulo.pack(pady=20)
 
-#adicionar campo valores
-valor = ctk.CTkEntry(app, placeholder_text='R$')
-valor.pack(padx=10, pady=10)
+        # Entrada de Valor
+        self.label_valor = ctk.CTkLabel(self, text='Digite o valor total da compra:', font=('Arial', 16))
+        self.label_valor.pack(pady=(10, 5))
 
-#escrever uma mensagem na janela
-text2 = ctk.CTkLabel(app, text='Forma de Pagamento:')
-text2.pack(padx=20, pady=20)
+        self.entry_valor = ctk.CTkEntry(self, placeholder_text='R$ 0.00', width=200, font=('Arial', 14))
+        self.entry_valor.pack(pady=5)
 
+        # Seção de Pagamento
+        self.label_pagamento = ctk.CTkLabel(self, text='Forma de Pagamento:', font=('Arial', 16, 'bold'))
+        self.label_pagamento.pack(pady=(30, 10))
 
+        # Botões de Pagamento
+        self.frame_botoes = ctk.CTkFrame(self, fg_color="transparent")
+        self.frame_botoes.pack(pady=10)
 
-# colocar botão
-def dinheiro():
-    app1 = ctk.CTkToplevel(app)
-    app1.title('Dinheiro')
-    app1.geometry('450x200')
-    texto3 = ctk.CTkLabel(app1, text='Pagamento Realizado.\n\n Volte Sempre!', text_color='green', font=('Arial', 30, 'bold'))
-    texto3.pack(padx=40, pady=40)
+        self.btn_dinheiro = ctk.CTkButton(self.frame_botoes, text='Dinheiro', command=self.pagar_dinheiro, width=150, corner_radius=20, hover_color='#3385ff')
+        self.btn_dinheiro.grid(row=0, column=0, padx=10, pady=10)
 
-botao_dinheiro = ctk.CTkButton(app, text='Dinheiro', command=dinheiro, width=10,  corner_radius=20, hover_color='#3385ff')
-botao_dinheiro.pack(side='top', padx=0, pady=0)
-app.toplevel_window = None
+        self.btn_cartao_vista = ctk.CTkButton(self.frame_botoes, text='Cartão à Vista', command=self.pagar_cartao_vista, width=150, corner_radius=20, hover_color='#3385ff')
+        self.btn_cartao_vista.grid(row=0, column=1, padx=10, pady=10)
 
-# colocar botão
-def cartao_vista():
-    app2 = ctk.CTkToplevel(app)
-    app2.title('Cartão à Vista')
-    app2.geometry('450x200')
-    texto4 = ctk.CTkLabel(app2, text='Pagamento Realizado.\n\n Volte Sempre!', text_color='green', font=('Arial', 30, 'bold'))
-    texto4.pack(padx=40, pady=40)
+        # Seção de Parcelamento
+        self.frame_parcelado = ctk.CTkFrame(self, fg_color="transparent")
+        self.frame_parcelado.pack(pady=20)
 
-botao_cartao = ctk.CTkButton(app, text='Cartão à Vista', command=cartao_vista, width=10, corner_radius=20, hover_color='#3385ff')
-botao_cartao.pack(side='top', padx=10, pady=10)
-app.toplevel_window = None
+        self.label_parcelado = ctk.CTkLabel(self.frame_parcelado, text='Cartão de Crédito Parcelado:', font=('Arial', 14))
+        self.label_parcelado.pack(pady=5)
 
+        self.combo_parcelas = ctk.CTkComboBox(self.frame_parcelado, values=['2x', '3x', '4x', '5x', '6x'], width=200)
+        self.combo_parcelas.set('Selecione as parcelas')
+        self.combo_parcelas.pack(pady=5)
 
-# colocar botão
-def cartao_parcelado():
+        self.btn_confirmar_parcelado = ctk.CTkButton(self.frame_parcelado, text='Confirmar Parcelamento', command=self.pagar_cartao_parcelado, width=200, corner_radius=20, hover_color='#3385ff')
+        self.btn_confirmar_parcelado.pack(pady=10)
 
-    botao_cartao1 = ctk.CTkButton(app, text='Cartão Parcelado', command=cartao_parcelado, width=10, corner_radius=20, hover_color='#3385ff')
-    botao_cartao1.pack()
+        # Botão Finalizar
+        self.btn_finalizar = ctk.CTkButton(self, text='Finalizar Compra', command=self.finalizar_compra, width=200, height=40, hover_color='#ff3333', fg_color='red', font=('Arial', 16, 'bold'))
+        self.btn_finalizar.pack(side='bottom', pady=40)
 
-text5 = ctk.CTkLabel(app, text='Cartão de Crédito Parcelado:')
-text5.pack(padx=20, pady=20)
+    def validar_valor(self):
+        try:
+            valor_str = self.entry_valor.get().replace('R$', '').replace(',', '.').strip()
+            valor = float(valor_str)
+            if valor <= 0:
+                raise ValueError
+            return valor
+        except ValueError:
+            messagebox.showerror("Erro", "Por favor, insira um valor válido maior que zero.")
+            return None
 
-parcelas = ctk.CTkComboBox(app, values=['Parcelado 2x', 'Parcelado 3x', 'Parcelado 4x', 'Parcelado 5x', 'Parcelado 6x'],
-                               command=cartao_parcelado)
-parcelas.set('')
-parcelas.pack(side='top', padx=1, pady=1)
+    def mostrar_mensagem_sucesso(self, titulo, mensagem):
+        top = ctk.CTkToplevel(self)
+        top.title(titulo)
+        top.geometry('400x200')
+        top.transient(self) # Mantém a janela na frente da principal
+        
+        label = ctk.CTkLabel(top, text=mensagem, text_color='green', font=('Arial', 20, 'bold'), wraplength=350)
+        label.pack(expand=True, padx=20, pady=20)
+        
+        btn_fechar = ctk.CTkButton(top, text="Fechar", command=top.destroy)
+        btn_fechar.pack(pady=20)
 
+    def pagar_dinheiro(self):
+        valor = self.validar_valor()
+        if valor:
+            self.mostrar_mensagem_sucesso('Dinheiro', f'Pagamento de R$ {valor:.2f} em Dinheiro recebido.\nVolte Sempre!')
 
-# colocar botao e definir a funçao do botao
-def finalizar():
-    app3 = ctk.CTkToplevel(app)
-    app3.title('Compra Finalizada')
-    app3.geometry('470x200')
-    texto6 = ctk.CTkLabel(app3, text='Compra Finalizada Com Sucesso!\n\n Volte Sempre!', text_color='green', font=('Arial', 25, 'bold'))
-    texto6.pack(side='top', padx=40, pady=40)
-    app.toplevel_window = None
+    def pagar_cartao_vista(self):
+        valor = self.validar_valor()
+        if valor:
+            self.mostrar_mensagem_sucesso('Cartão à Vista', f'Pagamento de R$ {valor:.2f} no Cartão à Vista aprovado.\nVolte Sempre!')
 
+    def pagar_cartao_parcelado(self):
+        valor = self.validar_valor()
+        if not valor:
+            return
 
-botao_finalizar = ctk.CTkButton(app, text='Finalizar Compra', command=finalizar,hover_color='#ff3333')
-botao_finalizar.pack(padx=50, pady=50)
+        parcelas_str = self.combo_parcelas.get()
+        if parcelas_str == 'Selecione as parcelas':
+            messagebox.showwarning("Atenção", "Selecione o número de parcelas.")
+            return
 
+        num_parcelas = int(parcelas_str.replace('x', ''))
+        valor_parcela = valor / num_parcelas
+        
+        self.mostrar_mensagem_sucesso('Cartão Parcelado', f'Pagamento de R$ {valor:.2f} parcelado em {num_parcelas}x de R$ {valor_parcela:.2f}.\nVolte Sempre!')
 
+    def finalizar_compra(self):
+        if messagebox.askyesno("Finalizar", "Deseja realmente finalizar o sistema?"):
+            self.destroy()
 
-#mantém janela aberta
-app.mainloop()
+if __name__ == "__main__":
+    app = PharmacyApp()
+    app.mainloop()
+
 
 
 
